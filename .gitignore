@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build outputs
+dist/
+*/dist/
+build/
+*/build/
+
+# Database files (don't push dev data)
+*.db
+*.db-journal
+backend/dev.db
+backend/pglite-data/
+
+# Environment files (NEVER push secrets)
+.env
+backend/.env
+frontend/.env
+
+# TypeScript cache
+*.tsbuildinfo
+*/tsconfig.build.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Prisma migrations lock (keep schema, not lock)
+backend/prisma/migrations/migration_lock.toml

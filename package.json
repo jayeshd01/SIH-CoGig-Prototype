@@ -1,0 +1,22 @@
+{
+  "name": "cogig-platform",
+  "version": "1.0.0",
+  "description": "CoGig - Cooperative digital marketplace for household and community services",
+  "private": true,
+  "scripts": {
+    "start": "node start.js",
+    "dev": "node start.js",
+    "dev:backend": "cd backend && npm run start:dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd backend && npm run build && cd ../frontend && npm run build",
+    "seed": "cd backend && npx tsx prisma/seed.ts"
+  },
+  "keywords": [
+    "cooperative",
+    "gig-platform",
+    "urban-services",
+    "fair-wages",
+    "worker-welfare"
+  ],
+  "author": "CoGig Cooperative Federation"
+}

@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #1B6B3A;
+  --color-primary-light: #2A8F4F;
+  --color-primary-dark: #145A2F;
+  --color-secondary: #E8722A;
+  --color-secondary-light: #F5943E;
+  --color-accent: #F5C042;
+  --color-bg: #F8F7F4;
+  --color-bg-white: #FFFFFF;
+  --color-text: #1E1E1E;
+  --color-text-secondary: #6B7280;
+  --color-text-light: #9CA3AF;
+  --color-border: #E5E7EB;
+  --color-border-light: #F3F4F6;
+  --color-success: #16A34A;
+  --color-warning: #F59E0B;
+  --color-danger: #DC2626;
+  --color-info: #2563EB;
+  --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Base */
+body {
+  font-family: var(--font-family-sans);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Status badge colors */
+.status-requested { background: #FEF3C7; color: #92400E; }
+.status-assigned { background: #DBEAFE; color: #1E40AF; }
+.status-accepted { background: #D1FAE5; color: #065F46; }
+.status-in-progress { background: #E0E7FF; color: #3730A3; }
+.status-completed { background: #D1FAE5; color: #065F46; }
+.status-payment-released { background: #D1FAE5; color: #065F46; }
+.status-rated { background: #F3F4F6; color: #374151; }
+.status-cancelled { background: #FEE2E2; color: #991B1B; }
+
+/* Smooth transitions */
+.transition-fast { transition: all 0.15s ease; }
+
+/* Card hover */
+.card-hover { transition: box-shadow 0.2s ease, transform 0.2s ease; }
+.card-hover:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-1px); }
