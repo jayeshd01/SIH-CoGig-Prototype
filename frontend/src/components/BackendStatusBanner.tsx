@@ -12,18 +12,16 @@ export const BackendStatusBanner: React.FC = () => {
     setRetrySuccess(false);
     try {
       // Fast lightweight ping to backend services or health
-      await api.get('/services', { timeout: 3500 });
-      setIsBackendDown(false);
-      setRetrySuccess(true);
-      setTimeout(() => setRetrySuccess(false), 3000);
-    } catch (err: any) {
-      // Network Error, ERR_CONNECTION_REFUSED, or server 5xx
-      if (!err.response || err.response.status >= 500 || err.code === 'ERR_NETWORK') {
-        setIsBackendDown(true);
-      } else {
-        // Received response from backend (e.g. 401/404) -> server IS running
+      const res = await api.get('/services', { timeout: 3500 });
+      if (Array.isArray(res.data)) {
         setIsBackendDown(false);
+        setRetrySuccess(true);
+        setTimeout(() => setRetrySuccess(false), 3000);
+      } else {
+        setIsBackendDown(true);
       }
+    } catch (err: any) {
+      setIsBackendDown(true);
     } finally {
       setIsChecking(false);
     }

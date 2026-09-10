@@ -16,6 +16,8 @@ import {
 } from 'react-icons/fi';
 import BookingModal from '../components/BookingModal';
 
+import { DEFAULT_WORKERS } from '../data/mockData';
+
 const WorkerProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [worker, setWorker] = useState<Worker | null>(null);
@@ -27,14 +29,28 @@ const WorkerProfile: React.FC = () => {
     const fetchWorkerData = async () => {
       try {
         setLoading(true);
-        const [workerRes, reviewsRes] = await Promise.all([
+        const [workerRes, reviewsRes] = await Promise.allSettled([
           api.get(`/workers/${id}`),
-          api.get(`/ratings/worker/${id}`).catch(() => ({ data: [] })),
+          api.get(`/ratings/worker/${id}`),
         ]);
-        setWorker(workerRes.data);
-        setReviews(reviewsRes.data || []);
+
+        if (workerRes.status === 'fulfilled' && workerRes.value?.data && typeof workerRes.value.data === 'object' && !Array.isArray(workerRes.value.data)) {
+          setWorker(workerRes.value.data);
+        } else {
+          const fallback = DEFAULT_WORKERS.find((w) => w.id === id) || DEFAULT_WORKERS[0];
+          setWorker(fallback);
+        }
+
+        if (reviewsRes.status === 'fulfilled' && Array.isArray(reviewsRes.value?.data)) {
+          setReviews(reviewsRes.value.data);
+        } else {
+          setReviews([]);
+        }
       } catch (err) {
-        console.error('Error fetching worker profile', err);
+        console.error('Error fetching worker profile, using fallback', err);
+        const fallback = DEFAULT_WORKERS.find((w) => w.id === id) || DEFAULT_WORKERS[0];
+        setWorker(fallback);
+        setReviews([]);
       } finally {
         setLoading(false);
       }

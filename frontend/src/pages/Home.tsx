@@ -24,12 +24,14 @@ import BookingModal from '../components/BookingModal';
 import FairWageModal from '../components/FairWageModal';
 import EmergencySOSModal from '../components/EmergencySOSModal';
 
+import { DEFAULT_SERVICES, DEFAULT_WORKERS } from '../data/mockData';
+
 const Home: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const [services, setServices] = useState<Service[]>([]);
-  const [featuredWorkers, setFeaturedWorkers] = useState<Worker[]>([]);
+  const [services, setServices] = useState<Service[]>(DEFAULT_SERVICES.slice(0, 8));
+  const [featuredWorkers, setFeaturedWorkers] = useState<Worker[]>(DEFAULT_WORKERS.slice(0, 4));
   const [calculatorAmount, setCalculatorAmount] = useState<number>(500);
   const [showVoiceModal, setShowVoiceModal] = useState(false);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -39,14 +41,19 @@ const Home: React.FC = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [servicesRes, workersRes] = await Promise.all([
+        const [servicesRes, workersRes] = await Promise.allSettled([
           api.get('/services'),
           api.get('/workers/nearby?lat=18.5204&lng=73.8567&radius=20'),
         ]);
-        setServices(servicesRes.data.slice(0, 8));
-        setFeaturedWorkers(workersRes.data.slice(0, 4));
+
+        if (servicesRes.status === 'fulfilled' && Array.isArray(servicesRes.value?.data)) {
+          setServices(servicesRes.value.data.slice(0, 8));
+        }
+        if (workersRes.status === 'fulfilled' && Array.isArray(workersRes.value?.data)) {
+          setFeaturedWorkers(workersRes.value.data.slice(0, 4));
+        }
       } catch (err) {
-        console.error('Error fetching home data', err);
+        console.error('Error fetching home data, using fallback data', err);
       }
     };
     loadData();
@@ -219,7 +226,7 @@ const Home: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {services.map((srv) => (
+            {(Array.isArray(services) ? services : DEFAULT_SERVICES.slice(0, 8)).map((srv) => (
               <div
                 key={srv.id}
                 className="p-4 rounded-2xl border border-gray-200 hover:border-[#1B6B3A] bg-gray-50/50 hover:bg-white transition-all card-hover group flex flex-col justify-between"
@@ -393,7 +400,7 @@ const Home: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {featuredWorkers.map((worker) => (
+          {(Array.isArray(featuredWorkers) ? featuredWorkers : DEFAULT_WORKERS.slice(0, 4)).map((worker) => (
             <div
               key={worker.id}
               className="bg-white rounded-2xl p-5 border border-gray-200 hover:border-emerald-300 shadow-xs card-hover flex flex-col justify-between"

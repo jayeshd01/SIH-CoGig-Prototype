@@ -13,20 +13,23 @@ import {
   FiHeart,
 } from 'react-icons/fi';
 
+import { DEFAULT_WORKERS } from '../data/mockData';
+
 const Workers: React.FC = () => {
-  const [workers, setWorkers] = useState<Worker[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [workers, setWorkers] = useState<Worker[]>(DEFAULT_WORKERS);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCoop, setSelectedCoop] = useState<string>('all');
 
   useEffect(() => {
     const fetchWorkers = async () => {
       try {
-        setLoading(true);
         const res = await api.get('/workers/nearby?lat=18.5204&lng=73.8567&radius=30');
-        setWorkers(res.data);
+        if (Array.isArray(res?.data) && res.data.length > 0) {
+          setWorkers(res.data);
+        }
       } catch (err) {
-        console.error('Error fetching workers', err);
+        console.error('Error fetching workers, using default directory', err);
       } finally {
         setLoading(false);
       }
@@ -34,7 +37,8 @@ const Workers: React.FC = () => {
     fetchWorkers();
   }, []);
 
-  const filteredWorkers = workers.filter((w) => {
+  const safeWorkers = Array.isArray(workers) ? workers : DEFAULT_WORKERS;
+  const filteredWorkers = safeWorkers.filter((w) => {
     if (selectedCoop !== 'all' && w.cooperative?.name !== selectedCoop) return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();

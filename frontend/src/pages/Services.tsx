@@ -15,13 +15,15 @@ import {
 import BookingModal from '../components/BookingModal';
 import FairWageModal from '../components/FairWageModal';
 
+import { DEFAULT_SERVICES } from '../data/mockData';
+
 const Services: React.FC = () => {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCategory = searchParams.get('cat') || 'all';
 
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [services, setServices] = useState<Service[]>(DEFAULT_SERVICES);
+  const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'price_asc' | 'price_desc' | 'name'>('price_asc');
@@ -32,11 +34,12 @@ const Services: React.FC = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        setLoading(true);
         const res = await api.get('/services');
-        setServices(res.data);
+        if (Array.isArray(res?.data) && res.data.length > 0) {
+          setServices(res.data);
+        }
       } catch (err) {
-        console.error('Error fetching services', err);
+        console.error('Error fetching services, using default catalog', err);
       } finally {
         setLoading(false);
       }
@@ -60,7 +63,8 @@ const Services: React.FC = () => {
     { id: 'emergency', label: 'Emergency', icon: '🚨' },
   ];
 
-  const filteredServices = services
+  const safeServices = Array.isArray(services) ? services : DEFAULT_SERVICES;
+  const filteredServices = safeServices
     .filter((s) => {
       if (selectedCategory !== 'all' && s.category !== selectedCategory) return false;
       if (
