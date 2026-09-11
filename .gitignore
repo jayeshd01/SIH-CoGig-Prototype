@@ -16,6 +16,8 @@ backend/pglite-data/
 
 # Environment files (NEVER push secrets)
 .env
+*.env.production
+.env.production
 backend/.env
 frontend/.env
 

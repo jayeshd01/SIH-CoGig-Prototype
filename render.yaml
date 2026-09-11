@@ -1,0 +1,54 @@
+services:
+  # ─────────────────────────────────────────────────────────────
+  # 1. Backend Web Service (NestJS + Prisma + SQLite)
+  # ─────────────────────────────────────────────────────────────
+  - type: web
+    name: sahyog-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npx prisma db push && npx prisma db seed && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: /api/services
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        value: "file:./dev.db"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION
+        value: "1h"
+      - key: JWT_REFRESH_EXPIRATION
+        value: "7d"
+      - key: FRONTEND_URL
+        fromStaticSite:
+          name: sahyog-frontend
+          type: host
+      - key: ML_SERVICE_URL
+        value: "http://localhost:8000"
+
+  # ─────────────────────────────────────────────────────────────
+  # 2. Frontend Static Site (React 19 + Vite)
+  # ─────────────────────────────────────────────────────────────
+  - type: static
+    name: sahyog-frontend
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: sahyog-backend
+          property: host
+          value: https://sahyog-backend.onrender.com
