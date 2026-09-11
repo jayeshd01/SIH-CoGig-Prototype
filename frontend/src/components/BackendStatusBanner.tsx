@@ -1,13 +1,29 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/client';
-import { FiAlertTriangle, FiRefreshCw, FiCheckCircle } from 'react-icons/fi';
+import { FiAlertTriangle, FiRefreshCw, FiCheckCircle, FiX } from 'react-icons/fi';
 
 export const BackendStatusBanner: React.FC = () => {
   const [isBackendDown, setIsBackendDown] = useState<boolean>(false);
   const [isChecking, setIsChecking] = useState<boolean>(false);
   const [retrySuccess, setRetrySuccess] = useState<boolean>(false);
+  const [isDismissed, setIsDismissed] = useState<boolean>(() => {
+    return sessionStorage.getItem('dismiss_backend_banner') === 'true';
+  });
+
+  // Only consider showing connection alert in local development environments
+  const isLocalhost =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.hostname.startsWith('192.168.'));
 
   const checkConnection = useCallback(async () => {
+    // Never show on remote production hosts (e.g. netlify.app)
+    if (!isLocalhost) {
+      setIsBackendDown(false);
+      return;
+    }
+
     setIsChecking(true);
     setRetrySuccess(false);
     try {
@@ -25,12 +41,18 @@ export const BackendStatusBanner: React.FC = () => {
     } finally {
       setIsChecking(false);
     }
-  }, []);
+  }, [isLocalhost]);
 
   useEffect(() => {
-    // Initial check on load
-    checkConnection();
-  }, [checkConnection]);
+    if (isLocalhost) {
+      checkConnection();
+    }
+  }, [checkConnection, isLocalhost]);
+
+  // If not running on localhost or dismissed by user, do not render
+  if (!isLocalhost || isDismissed) {
+    return null;
+  }
 
   if (retrySuccess) {
     return (
@@ -50,7 +72,7 @@ export const BackendStatusBanner: React.FC = () => {
       <div className="flex items-center gap-2">
         <FiAlertTriangle className="text-base flex-shrink-0 text-amber-100" />
         <span className="font-medium">
-          Unable to connect to the service. Please make sure the backend server is running (port 3000).
+          Local backend server is not running on port 3000. Operating in standalone demo mode.
         </span>
       </div>
       <div className="flex items-center gap-2">
@@ -61,6 +83,16 @@ export const BackendStatusBanner: React.FC = () => {
         >
           <FiRefreshCw className={isChecking ? 'animate-spin' : ''} />
           <span>{isChecking ? 'Checking...' : 'Retry Connection'}</span>
+        </button>
+        <button
+          onClick={() => {
+            setIsDismissed(true);
+            sessionStorage.setItem('dismiss_backend_banner', 'true');
+          }}
+          className="p-1 text-white/80 hover:text-white transition cursor-pointer"
+          title="Dismiss"
+        >
+          <FiX className="text-base" />
         </button>
       </div>
     </div>
